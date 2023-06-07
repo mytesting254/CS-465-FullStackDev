@@ -8,8 +8,8 @@ export class TripDataService {
 
   constructor(private http: Http) { } // inject the Http service
 
-  private apiBaseUrl = 'http://localhost:3000/api'; // define the API base URL
-  private tripsUrl = `${this.apiBaseUrl}/trips`; // define the trips URL
+  private apiBaseUrl = 'http://localhost:3000/api/'; // define the API base URL
+  private tripsUrl = `${this.apiBaseUrl}trips/`; // define the trips URL
 
   // implement the method to add a trip to the API
   public addTrip(formData: Trip): Promise<Trip> {
