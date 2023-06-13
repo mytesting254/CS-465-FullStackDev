@@ -25,4 +25,12 @@ export class TripCardComponent implements OnInit {
     this.router.navigate(['edit-trip']);
   }
 
+  // implement delete trip
+  private deleteTrip(trip: Trip): void {
+    console.log('Inside TripCardComponent#deleteTrip');
+    localStorage.removeItem("tripCode");
+    localStorage.setItem("tripCode", trip.code);
+    this.router.navigate(['delete-trip']);
+  }
+
 }

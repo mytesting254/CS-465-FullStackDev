@@ -82,8 +82,9 @@ const tripsUpdateTrip = async (req, res) => {
 
 // add a new trip
 const tripsAddTrip = async (req, res) => {
-    model
-        .create({
+    // use try catch to handle errors
+    try {
+        const trip = await model.create({
             code: req.body.code,
             name: req.body.name,
             length: req.body.length,
@@ -92,22 +93,49 @@ const tripsAddTrip = async (req, res) => {
             perPerson: req.body.perPerson,
             image: req.body.image,
             description: req.body.description
-        }, (err, trip) => {
-            if (err) {
-                return res
-                    .status(400) // 400 Bad Request, invalid data
-                    .json(err);
-            } else {
-                return res
-                    .status(201) // 201 Created
-                    .json(trip);
-            }
         });
+        return res
+            .status(201)
+            .json(trip);
+    } catch (err) {
+        return res
+            .status(400)
+            .json(err);
+    }
 };
+
+// DELETE: /trips/:tripCode - delete a single trip
+const tripsDeleteTrip = async (req, res) => {
+   // use try catch to handle errors
+    const { tripCode } = req.params;
+
+    if (tripCode) {
+        try {
+            const trip = await model.findOneAndDelete({ 'code': tripCode });
+            if (!trip) {
+                return res
+                    .status(404)
+                    .json({ "message": "trip not found" });
+            }
+            return res
+                .status(200)
+                .json(trip);
+        }   catch (err) {
+            return res
+                .status(400)
+                .json(err);
+        }
+    } else {
+        return res
+            .status(404)
+            .json({ "message": "No tripCode" });
+    }
+};        
 
 module.exports = {
     tripsList,
     tripsFindCode,
     tripsAddTrip,
-    tripsUpdateTrip
+    tripsUpdateTrip,
+    tripsDeleteTrip
 };

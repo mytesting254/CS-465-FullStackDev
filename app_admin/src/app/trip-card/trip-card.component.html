@@ -7,7 +7,13 @@
           {{trip.perPerson|currency:'USD':true}} per person</p>
        <p class="card-text" [innerHTML]="trip.description"></p>
   </div>
-  <div>
-    <button (click)="editTrip(trip)" class="btn btn-info">Edit</button>
+  <div class="row">
+    <div class="col">
+      <button (click)="editTrip(trip)" class="btn btn-info">Edit</button>
+    </div>
+    <div class="col">
+      <button (click)="deleteTrip(trip)" class="btn btn-info">Delete</button>
+    </div>
   </div>
+  
 </div>
