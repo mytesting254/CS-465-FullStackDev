@@ -1,12 +1,18 @@
-import { Injectable } from "@angular/core"; // import the Injectable decorator
+import { Injectable, Inject } from "@angular/core"; // import the Injectable decorator
 import { Http } from "@angular/http";
 
 import { Trip } from "../models/trip"; // import the Trip interface
+import { BROWSER_STORAGE } from "../storage"; // import the BROWSER_STORAGE token
+import { AuthResponse } from "../models/authresponse"; // import the AuthResponse interface
+import { User } from "../models/user"; // import the User interface
 
 @Injectable()
 export class TripDataService {
 
-  constructor(private http: Http) { } // inject the Http service
+  constructor(
+    private http: Http,
+    @Inject(BROWSER_STORAGE) private storage: Storage
+    ) { } // inject the Http service
 
   private apiBaseUrl = 'http://localhost:3000/api/'; // define the API base URL
   private tripsUrl = `${this.apiBaseUrl}trips/`; // define the trips URL
@@ -62,10 +68,37 @@ export class TripDataService {
       .catch(this.handleError);
   }
 
-  // 
+  // add a user into the user database
+  public addUser(user: User): Promise<User> {
+    console.log('Inside TripDataService#addUser');
+    return this.http
+      .post(this.apiBaseUrl + 'register', user) // template string
+      .toPromise()
+      .then(response => response.json() as User[])
+      .catch(this.handleError);
+  }
+
+  
   private handleError(error: any): Promise<any> {
     console.error('Something has gone wrong', error); // for demo purposes only
     return Promise.reject(error.message || error);
+  }
+
+  public login(user: User): Promise<AuthResponse> {
+    return this.makeAuthApiCall('login', user);
+  }
+
+  public register(user: User): Promise<AuthResponse> {
+    return this.makeAuthApiCall('register', user);
+  }
+
+  private makeAuthApiCall(urlPath: string, user: User): Promise<AuthResponse> {
+    const url: string = `${this.apiBaseUrl}${urlPath}`;
+    return this.http
+      .post(url, user)
+      .toPromise()
+      .then(response => response.json() as AuthResponse)
+      .catch(this.handleError);
   }
 
 }
