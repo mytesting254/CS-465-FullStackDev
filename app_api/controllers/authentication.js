@@ -29,20 +29,24 @@ const register = (req, res) => {
 
 const login = (req, res) => {
     if (!req.body.email || !req.body.password) {
-        res.status(400).json({ "message": "All fields required" });
-        return;
+        res.status(400)
+        .json({ "message": "All fields required" });
     }
     passport.authenticate('local', (err, user, info) => {
-        let token;
         if (err) {
-            res.status(404).json(err);
-            return;
+            res
+                .status(404)
+                .json(err);           
         }
         if (user) {
-            token = user.generateJwt();
-            res.status(200).json({ "token": token });
+            const token = user.generateJwt();
+            res
+                .status(200)
+                .json({ "token": token });
         } else {
-            res.status(401).json(info);
+            res
+                .status(401)
+                .json(info);
         }
     })(req, res);
 }

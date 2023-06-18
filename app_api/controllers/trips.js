@@ -1,6 +1,4 @@
 const mongoose = require('mongoose'); //.set('debug', true);
-const { use } = require('passport');
-const { get } = require('request');
 const Trip = mongoose.model('trips');
 const User = mongoose.model('users');
 
@@ -48,14 +46,10 @@ const tripsFindCode = async (req, res) => {
 
 // Update a trip
 const tripsUpdateTrip = async (req, res) => {
-    console.log(user.email);
-    
-    getUser(req, res, (req, res) => {
-        // use try catch to handle errors
-        try {
-            const trip = Trip.findOneAndUpdate(
-                { 'code': req.params.tripCode },
-                {
+    getUser(req, res, 
+        (req, res) => {
+            Trip
+                .findOneAndUpdate({ 'code': req.params.tripCode }, {
                     code: req.body.code,
                     name: req.body.name,
                     length: req.body.length,
@@ -64,32 +58,41 @@ const tripsUpdateTrip = async (req, res) => {
                     perPerson: req.body.perPerson,
                     image: req.body.image,
                     description: req.body.description
-                },
-                { new: true }
+                }, { new: true })
+                .then(trip => {
+                    if (!trip) {
+                        return res
+                            .status(404)
+                            .send({
+                                message: "trip not found with code " + req.params.tripCode
+                            });
+                    }
+                    res.send(trip);
+                }).catch(err => {
+                    if (err.kind === 'ObjectId') {
+                        return res
+                            .status(404)
+                            .send({
+                                message: "trip not found with code " + req.params.tripCode
+                            });
+                    }
+                    return res
+                        .status(500)
+                        .send({
+                            message: "Error updating trip with code " + req.params.tripCode
+                        });
+                }
             );
-            if (!trip) {
-                return res
-                    .status(404)
-                    .json({ "message": "trip not found" });
-            }
-            return res
-                .status(200)
-                .json(trip);
-        } catch (err) {
-            return res
-                .status(400)
-                .json(err);
         }
-    });
+    );
 };
   
 
 // add a new trip
 const tripsAddTrip = async (req, res) => {
     getUser(req, res, (req, res) => {
-    // use try catch to handle errors
-        try {
-            const trip = Trip.create({
+        Trip
+            .create({
                 code: req.body.code,
                 name: req.body.name,
                 length: req.body.length,
@@ -98,47 +101,44 @@ const tripsAddTrip = async (req, res) => {
                 perPerson: req.body.perPerson,
                 image: req.body.image,
                 description: req.body.description
-            });
-            return res
-                .status(201)
-                .json(trip);
-        } catch (err) {
-            return res
-                .status(400)
-                .json(err);
-        }
+            }, (err, trip) => {
+                if (err) {
+                    res
+                        .status(400)
+                        .json(err);
+                } else {
+                    res
+                        .status(201)
+                        .json(trip);
+                }
+            }
+        );
     });
 };
 
 // DELETE: /trips/:tripCode - delete a single trip
 const tripsDeleteTrip = async (req, res) => {
-    getUser(req, res, (req, res) => {
-    // use try catch to handle errors
-        const { tripCode } = req.params;
-
-        if (tripCode) {
-            try {
-                const trip = Trip.findOneAndDelete({ 'code': tripCode });
-                if (!trip) {
+    getUser(req, res, 
+        (req, res) => {
+            Trip
+                .findOneAndDelete({ 'code': req.params.tripCode })
+                .then(trip => {
+                    if (!trip) {
+                        return res
+                            .status(404)
+                            .json({ "message": "trip not found" });
+                    }
                     return res
-                        .status(404)
-                        .json({ "message": "trip not found" });
-                }
-                return res
-                    .status(200)
-                    .json(trip);
-            }   catch (err) {
-                return res
-                    .status(400)
-                    .json(err);
-            }
-        } else {
-            return res
-                .status(404)
-                .json({ "message": "No tripCode" });
+                        .status(200)
+                        .json(trip);
+                }).catch(err => {
+                    return res
+                        .status(400)
+                        .json(err);
+                });
         }
-    });
-}; 
+    );
+};
 
 // get the user from the request
 const getUser = (req, res, callback) => {

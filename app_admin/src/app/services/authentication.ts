@@ -50,8 +50,8 @@ export class AuthenticationService {
     public getCurrentUser(): User {
         if (this.isLoggedIn()) {
             const token: string = this.getToken();
-            const { email, password } = JSON.parse(atob(token.split('.')[1]));
-            return { email, password } as User;
+            const { email, name } = JSON.parse(atob(token.split('.')[1]));
+            return { email, name } as User;
         }
     }
 }
