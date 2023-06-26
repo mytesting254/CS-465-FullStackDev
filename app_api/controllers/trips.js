@@ -142,9 +142,9 @@ const tripsDeleteTrip = async (req, res) => {
 
 // get the user from the request
 const getUser = (req, res, callback) => {
-    if (req.payload && req.payload.email) {
+    if (req.auth && req.auth.email) {
         User
-            .findOne({ email : req.payload.email })
+            .findOne({ email : req.auth.email })
             .exec((err, user) => {
                 if (!user) {
                     return res
